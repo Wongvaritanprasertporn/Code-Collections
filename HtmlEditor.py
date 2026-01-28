@@ -6,6 +6,39 @@ import ctypes
 
 ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
+class ArrayStack:
+    def __init__(self):
+        self._data = []                      
+
+    def __len__(self):
+        return len(self._data)
+
+    def is_empty(self):
+        return len(self._data) == 0
+
+    def push(self, e):
+        self._data.append(e)                  
+
+    def top(self):
+        if self.is_empty():
+            raise Exception('Stack is empty')
+        return self._data[-1]                 
+
+    def pop(self):
+        if self.is_empty():
+            raise Exception('Stack is empty')
+        return self._data.pop()               
+
+    def pop_all(self, temp = None):
+        if self.is_empty() and temp is None:
+            raise Empty('Stack is empty')
+        if temp is None:
+            temp = []
+        if self.is_empty():
+            return temp
+        temp2 = temp + [self._data.pop()]
+        return self.pop_all(temp2)
+
 def open_file():
     path = filedialog.askopenfilename(
         filetypes=[("Text Files", "*.txt"), ("HTML Files", "*.html;*.htm"), ("All Files", "*.*")])
@@ -62,32 +95,6 @@ def update_field(event=None):
     char_count_label.config(text=f"Characters: {charCount}")
     word_count_label.config(text=f"Words: {wordCount}")
 
-class Empty(Exception):
-    pass
-
-class ArrayStack:
-    def __init__(self):
-        self._data = []                      
-
-    def __len__(self):
-        return len(self._data)
-
-    def is_empty(self):
-        return len(self._data) == 0
-
-    def push(self, e):
-        self._data.append(e)                  
-
-    def top(self):
-        if self.is_empty():
-            raise Empty('Stack is empty')
-        return self._data[-1]                 
-
-    def pop(self):
-        if self.is_empty():
-            raise Empty('Stack is empty')
-        return self._data.pop()               
-    
 def matching_html(raw):
     S = ArrayStack()
     j = raw.find('<')
@@ -97,24 +104,6 @@ def matching_html(raw):
             return False
         tag = raw[j+1:k]
         if not tag.startswith('/'):
-            S.push(tag)
-        else:
-            if S.is_empty():
-                return False
-            if tag[1:] != S.pop():
-                return False
-        j = raw.find('<', k+1)
-    return S.is_empty()
-
-def is_matched_html(raw):
-    S = ArrayStack()
-    j = raw.find('<')               
-    while j != -1:
-        k = raw.find('>', j+1)        
-        if k == -1:
-            return False               
-        tag = raw[j+1:k]              
-        if not tag.startswith('/'):   
             result = tag.split()
             S.push(result[0])
         else:
@@ -124,16 +113,6 @@ def is_matched_html(raw):
                 return False
         j = raw.find('<', k+1)
     return S.is_empty()
-
-def pop_all(self, temp = None):
-    if self.is_empty() and temp is None:
-        raise Empty('Stack is empty')
-    if temp is None:
-        temp = []
-    if self.is_empty():
-        return temp
-    temp2 = temp + [self._data.pop()]
-    return self.pop_all(temp2)
 
 def get_top_word_frequencies(text_content, top_n=10):
     word_frequency = {}
@@ -214,4 +193,5 @@ if __name__ == '__main__':
         label.pack(side=tk.LEFT, padx=5)
     window.geometry("900x650")
     window.mainloop()
+
 
